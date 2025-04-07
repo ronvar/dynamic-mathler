@@ -17,7 +17,6 @@ export function useMathler() {
     if (userMetadata) {
       // check if old games exists in history, isnt complete, and is not older than 24h
       const lastGame = userMetadata?.history?.[userMetadata.history.length - 1];
-      console.log('lastGame', lastGame);
       if (lastGame) {
         // if the last game was started today, set it as the active game
         if (wasStartedToday(lastGame)) {
@@ -37,14 +36,12 @@ export function useMathler() {
 
   const createNewGame = useCallback(async () => {
     if (isLoading) {
-      console.log("Puzzle is still loading");
       return;
     }
 
     const lastGame = userMetadata?.history?.[userMetadata.history.length - 1];
     if (activeGame && wasStartedToday(activeGame)) {
         console.log("Current game already started today");
-
         return;
       
     } else if (!activeGame && !!lastGame && wasStartedToday(lastGame)) {
