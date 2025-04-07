@@ -5,9 +5,11 @@ import { FaHome } from "react-icons/fa";
 import { BsFillGrid3X3GapFill } from "react-icons/bs";
 import { GiCubes } from "react-icons/gi";
 import styles from "./navbar.module.scss";
+import { useUserData } from "@/hooks/useUserData";
 
 const AppNavBar: React.FC = () => {
   const router = useRouter();
+  const { user } = useUserData();
   const currentRoute = usePathname();
   const [isHome, isPlay, isHistory] = [
     currentRoute === "/",
@@ -56,7 +58,7 @@ const AppNavBar: React.FC = () => {
           fullWidth
           mb="xs"
           onClick={onClickPlay}
-          disabled={isPlay}
+          disabled={isPlay || !user}
         >
           <Group position="apart" spacing={4} w={"100%"}>
             <BsFillGrid3X3GapFill size={20} />
@@ -68,7 +70,7 @@ const AppNavBar: React.FC = () => {
           fullWidth
           mb="xs"
           onClick={onClickHistory}
-          disabled={isHistory}
+          disabled={isHistory || !user}
         >
           <Group position="apart" spacing={4} w={"100%"}>
             <GiCubes size={20} />
