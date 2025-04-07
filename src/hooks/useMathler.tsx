@@ -25,7 +25,8 @@ export function useMathler() {
         }
       }
     } else {
-      console.log("No user metadata found", userMetadata);
+      setActiveGame(null);
+      setActiveRow(0);
     }
   }, [userMetadata, todaysPuzzle]);
 

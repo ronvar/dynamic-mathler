@@ -28,6 +28,11 @@ const PlayGame: React.FC = () => {
             <Text size={26} weight={500}>
               Your equation should equal: <b>{puzzleTargetValue}</b>
             </Text>
+            <Text size={14}>
+              Use <b>Space</b> or <b>Tab</b> to jump to the next tile <br />
+              Use <b>Enter</b> to submit your answer <br />
+              Use <b>Backspace</b> to delete a tile
+            </Text>
         {!activeGame && <Button variant="outline" color="green" size="lg" onClick={createNewGame} w={"min-content"} my={6}>Start</Button>}
           </Stack>
         </Center>

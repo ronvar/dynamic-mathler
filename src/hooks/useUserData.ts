@@ -5,6 +5,7 @@ import {
 } from "@/state/atoms";
 import { MathlerGameRecord } from "@/types/mathler";
 import { UserMetadata } from "@/types/user";
+import { compressMetadata, decompressMetadata } from "@/utils/compression";
 import {
   useDynamicContext,
   useIsLoggedIn,
@@ -29,12 +30,19 @@ export function useUserData(fetchData = false) {
   const [user, setUser] = useAtom(userAtom);
 
   const fetchUserAndMetadata = useCallback(async () => {
-    if (isLoading || !isLoggedIn || !fetchData) return;
+    if (isLoading || !isLoggedIn) return;
     setIsLoading(true);
     try {
       const data = await refresh();
+      const metadata = data?.metadata as { mathler: string };
+      
+      if (metadata?.mathler) {
+        const decompressedMetadata = decompressMetadata(metadata.mathler) as UserMetadata;
+        setUserMetadata(decompressedMetadata);
+      } else {
+        setUserMetadata(undefined);
+      }
       setUser(data);
-      setUserMetadata(data?.metadata as UserMetadata);
     } catch (error) {
       console.error("Error fetching user data:", error);
     } finally {
@@ -56,6 +64,9 @@ export function useUserData(fetchData = false) {
         fetchUserAndMetadata();
       }
   }, [isLoggedIn, user]);
+
+  useEffect(() => {
+  }, [userMetadata]);
 
   const updateUserMetadata = useCallback(
     async (game: MathlerGameRecord) => {
@@ -120,13 +131,20 @@ export function useUserData(fetchData = false) {
         totalGames: updatedMetadata.history.length,
         totalWins: atLeastOneRowIsAllGreen ? totalGamesWon + 1 : totalGamesWon,
       });
+
+      // Only keep the last 5 games in history
+      if (updatedMetadata.history.length > 5) {
+        updatedMetadata.history = updatedMetadata.history.slice(-5);
+      }
       setIsLoading(true);
       try {
         await updateUser({
-          metadata: updatedMetadata,
+          metadata: {
+            mathler: compressMetadata(updatedMetadata),
+          },
         });
         setIsLoading(false);
-        fetchUserAndMetadata();
+        await fetchUserAndMetadata();
       } catch (error) {
         console.error("Error updating user metadata:", error);
         setIsLoading(false);
@@ -154,7 +172,7 @@ export function useUserData(fetchData = false) {
       console.error("Error updating user metadata:", error);
     } finally {
       setIsLoading(false);
-      fetchUserAndMetadata();
+      await fetchUserAndMetadata();
     }
   }, [user, userMetadata, refresh, updateUser]);
 
