@@ -20,13 +20,17 @@ type GameGridProps = {
   puzzle: string[];
   activeGame: MathlerGameRecord | null;
   activeRowIndex: number;
-  onAttemptComplete: (attempt: AttemptItem[]) => Promise<void>;
+  onAttemptComplete?: (attempt: AttemptItem[]) => Promise<void>;
+  viewOnly?: boolean;
+  compact?: boolean;
 };
 
 export const GameGrid: React.FC<GameGridProps> = ({
   puzzle,
   activeGame,
   activeRowIndex,
+  viewOnly,
+  compact,
   onAttemptComplete,
 }) => {
   const [attempts, setAttempts] = useState<AttemptItem[][]>(
@@ -70,7 +74,7 @@ export const GameGrid: React.FC<GameGridProps> = ({
         if (isSolved || !currentRow[colIndex].value) {
           return;
         }
-        
+
         if (colIndex < rowLength - 1) {
           setActiveColumnIndex(colIndex + 1);
         }
@@ -83,7 +87,7 @@ export const GameGrid: React.FC<GameGridProps> = ({
         if (guess.length === rowLength && guess.every((t) => t.value)) {
           e.preventDefault();
           setIsSubmitting(true);
-          await onAttemptComplete(guess);
+          onAttemptComplete && await onAttemptComplete(guess);
           const wasCorrect = guess.every((t) => t.color === "green");
           setRowFeedback(wasCorrect ? "correct" : "incorrect");
           if (wasCorrect) {
@@ -217,6 +221,7 @@ export const GameGrid: React.FC<GameGridProps> = ({
         <SimpleGrid
           cols={rowLength}
           key={rowIndex}
+          spacing={compact ? 6 : undefined}
           className={
             rowIndex === activeRowIndex - 1 && rowFeedback
               ? styles[
@@ -231,14 +236,18 @@ export const GameGrid: React.FC<GameGridProps> = ({
             const isActiveRow = rowIndex === activeRowIndex;
             const isActiveColumn = colIndex === activeColumnIndex;
             let className = `${styles.tile}`;
-            if (isActiveRow && isActiveColumn && !isSolved) {
+            if (isActiveRow && isActiveColumn && !isSolved && !viewOnly) {
               className += ` ${styles.activeTile}`;
-            } else if (isActiveRow) {
+            } else if (isActiveRow && !viewOnly) {
               className += ` ${styles.unsolvedTile}`;
             } else if (row[colIndex]?.color) {
               className += ` ${styles[row[colIndex].color]}`;
             } else {
               className += ` ${styles.unsolvedTile}`;
+            }
+
+            if (compact) {
+              className += ` ${styles.compact}`;
             }
 
             return (

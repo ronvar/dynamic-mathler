@@ -3,41 +3,96 @@
 import { GameGrid } from "@/components/gameGrid/gameGrid";
 import { useMathler } from "@/hooks/useMathler";
 import { usePuzzleGrabber } from "@/hooks/usePuzzleGrabber";
-import { Button, Center, Stack, Text } from "@mantine/core";
+import { useUserData } from "@/hooks/useUserData";
+import { evaluateEquationArray } from "@/utils/mathler";
+import { Button, Center, Group, ScrollArea, Stack, Text } from "@mantine/core";
 import React from "react";
+import styles from "./page.module.scss";
 
-const PlayGame: React.FC = () => {
-  const { todaysPuzzle, puzzleTargetValue } = usePuzzleGrabber(true);
+const MyHistory: React.FC = () => {
+  const { todaysPuzzle, puzzleTargetValue } = usePuzzleGrabber(false);
+  const { userMetadata } = useUserData();
   const { activeGame, activeRow, createNewGame, submitAttempt } = useMathler();
 
-  let title = "Try to solve the puzzle!";
-  if (activeGame?.status === "won") {
-    title = "Hell yea, you did it. Congrats!";
-  } else if (activeGame?.status === "lost") {
-    title = "Game Over! Better luck next time!";
+  const history = [...(userMetadata?.history || [])];
+  
+  let title = "My Game History";
+  if (!history.length) {
+    title = "Play a game to start recording your history!";
   }
+
+  // total time played should be xx Hrs xx Mins
+  const totalTimePlayed = userMetadata?.totalTimePlayed || 0;
+  const totalTimePlayedHours = Math.floor(totalTimePlayed / 3600);
+  const totalTimePlayedMinutes = Math.floor((totalTimePlayed % 3600) / 60);
+  const totalTimePlayedString = `${totalTimePlayedHours} Hrs ${totalTimePlayedMinutes} Mins`;
 
   return (
     <Stack>
-      <Button onClick={createNewGame}>Create New Game</Button>
       <Center>
         <Stack align="center" spacing={2}>
           <Text size={30} weight={700}>
             {title}
           </Text>
-          <Text size={26} weight={500}>
-            Your equation should equal: <b>{puzzleTargetValue}</b>
-          </Text>
+          <Group>
+            <Text size={16} weight={500}>
+              Total Games Played: <b>{history.length}</b>
+            </Text>
+            <Text size={16} weight={500}>
+              Games Won: <b>{history.filter((game) => game.status === "won").length}</b>
+            </Text>
+            <Text size={16} weight={500}>
+              Games Lost: <b>{history.filter((game) => game.status === "lost").length}</b>
+            </Text>
+          </Group>
+          <Group>
+            <Text size={16} weight={500}>
+              Total Time Played: <b>{totalTimePlayedString}</b>
+            </Text>
+          </Group>
         </Stack>
       </Center>
-      <GameGrid
-        puzzle={todaysPuzzle}
-        activeGame={activeGame}
-        activeRowIndex={activeRow}
-        onAttemptComplete={submitAttempt}
-      />
+      <ScrollArea
+        style={{ height: "calc(90vh - 200px)" }}
+        type="always"
+        offsetScrollbars={false}
+        >
+          <Stack align="center">
+            {history.map((game, index) => (
+              <Stack className={styles.gameHistoryContainer} key={index} spacing={4} mb={10}>
+                <Stack align="center" spacing={0} mb={12}>
+                  <Text size={20} weight={700}>
+                    Game {index + 1}
+                  </Text>
+                  <Text size={16} weight={500}>
+                    Status: <b>{game.status}</b>
+                  </Text>
+                  <Text size={16} weight={500}>
+                    Your equation should equal: <b>{evaluateEquationArray(game.puzzle)}</b>
+                  </Text>
+                  <Text size={16} weight={500}>
+                    {new Date(game.finishedAt).toLocaleString("en-US", {
+                      month: "2-digit",
+                      day: "2-digit",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                    </Text>
+                </Stack>
+                <GameGrid
+                  puzzle={todaysPuzzle}
+                  activeGame={game}
+                  activeRowIndex={activeRow}
+                  viewOnly
+                  compact
+                />
+              </Stack>
+            ))}
+          </Stack>
+        </ScrollArea>
     </Stack>
   );
 };
 
-export default PlayGame;
+export default MyHistory;

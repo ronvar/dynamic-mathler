@@ -17,10 +17,18 @@ export function MathlersAppShell({ children }: { children: React.ReactNode }) {
   if (!mounted) {
     return null;
   }
-  
 
   return (
-    <AppShell padding="lg" navbar={<AppNavBar />} header={<AppHeaderBar />}>
+    <AppShell 
+    padding="lg" 
+    navbar={<AppNavBar />} 
+    header={<AppHeaderBar />}
+    styles={() => ({
+      main: {
+        minHeight: "90vh",
+        maxHeight: "90vh"
+      }
+    })}>
       {children}
     </AppShell>
   );

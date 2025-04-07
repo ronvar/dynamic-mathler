@@ -5,18 +5,6 @@ import {
 } from "@/types/mathler";
 import { evaluate } from "mathjs";
 
-const congratulatoryEmojis = [
-  "🎉",
-  "🥳",
-  "🎊",
-  "🎈",
-  "🎆",
-  "🎇",
-  "✨",
-  "🌟",
-  "🌈",
-];
-
 /**
  * check if a token is a valid operator
  */

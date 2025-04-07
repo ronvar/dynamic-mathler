@@ -15,6 +15,13 @@
   backdrop-filter: blur(4px);
 }
 
+.compact input {
+  height: 2.5rem;
+  width: 3rem;
+  font-size: 1rem;
+  border-width: 1px;
+}
+
 .inactiveTile input {
   // no keyboard input
   pointer-events: none;
