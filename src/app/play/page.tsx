@@ -10,9 +10,6 @@ const PlayGame: React.FC = () => {
   const { todaysPuzzle, puzzleTargetValue } = usePuzzleGrabber(true);
   const { activeGame, activeRow, createNewGame, submitAttempt } = useMathler();
 
-  console.log('todaysPuzzle', todaysPuzzle);
-  console.log('activeGame', activeGame);
-
   let title = "Try to solve the puzzle!";
   if (activeGame?.status === "won") {
     title = "Hell yea, you did it. Congrats!";
@@ -21,25 +18,27 @@ const PlayGame: React.FC = () => {
   }
 
   return (
-    <Stack>
-      <Button onClick={createNewGame}>Create New Game</Button>
-      <Center>
-        <Stack align="center" spacing={2}>
-          <Text size={30} weight={700}>
-            {title}
-          </Text>
-          <Text size={26} weight={500}>
-            Your equation should equal: <b>{puzzleTargetValue}</b>
-          </Text>
-        </Stack>
-      </Center>
-      <GameGrid
-        puzzle={todaysPuzzle}
-        activeGame={activeGame}
-        activeRowIndex={activeRow}
-        onAttemptComplete={submitAttempt}
-      />
-    </Stack>
+    <Center h={"100%"}>
+      <Stack>
+        <Center>
+          <Stack align="center" spacing={2}>
+            <Text size={30} weight={700}>
+              {title}
+            </Text>
+            <Text size={26} weight={500}>
+              Your equation should equal: <b>{puzzleTargetValue}</b>
+            </Text>
+        {!activeGame && <Button variant="outline" color="green" size="lg" onClick={createNewGame} w={"min-content"} my={6}>Start</Button>}
+          </Stack>
+        </Center>
+        <GameGrid
+          puzzle={todaysPuzzle}
+          activeGame={activeGame}
+          activeRowIndex={activeRow}
+          onAttemptComplete={submitAttempt}
+        />
+      </Stack>
+    </Center>
   );
 };
 

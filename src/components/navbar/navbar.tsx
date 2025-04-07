@@ -52,7 +52,7 @@ const AppNavBar: React.FC = () => {
           </Group>
         </Button>
         <Button
-          variant="outline"
+          variant="gradient"
           fullWidth
           mb="xs"
           onClick={onClickPlay}
@@ -64,7 +64,7 @@ const AppNavBar: React.FC = () => {
           </Group>
         </Button>
         <Button
-          variant="outline"
+          variant="gradient"
           fullWidth
           mb="xs"
           onClick={onClickHistory}

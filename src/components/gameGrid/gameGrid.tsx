@@ -38,7 +38,7 @@ export const GameGrid: React.FC<GameGridProps> = ({
   const [activeColumnIndex, setActiveColumnIndex] = useState(0);
   const inputRef = useRef<(HTMLInputElement | null)[][]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showSolvedModal, setShowSolvedModal] = useState(true);
+  const [showSolvedModal, setShowSolvedModal] = useState(false);
   const [rowFeedback, setRowFeedback] = useState<
     "correct" | "incorrect" | null
   >(null);
@@ -67,8 +67,11 @@ export const GameGrid: React.FC<GameGridProps> = ({
         keyPressed === "Tab"
       ) {
         e.preventDefault();
+        if (isSolved || !currentRow[colIndex].value) {
+          return;
+        }
+        
         if (colIndex < rowLength - 1) {
-          console.log("space pressed", colIndex);
           setActiveColumnIndex(colIndex + 1);
         }
       } else if (keyPressed === "Backspace") {

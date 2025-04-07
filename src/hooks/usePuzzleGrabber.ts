@@ -8,19 +8,37 @@ import {
 import { AttemptItem } from "@/types/mathler";
 import { evaluateEquationArray, normalizeOperator } from "@/utils/mathler";
 import { useAtom } from "jotai";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export function usePuzzleGrabber(fetchData?: boolean) {
   const [isLoading, setIsLoading] = useAtom(isLoadingPuzzleAtom);
+  const [lastFetched, setLastFetched] = useState<Date | null>(null);
   const [todaysPuzzle, setTodaysPuzzle] = useAtom(puzzleAtom);
   const [puzzleTargetValue, setPuzzleTargetValue] =
     useAtom(dailyTargetValueAtom);
+    const currentDayRef = useRef<string>("");
 
   useEffect(() => {
     if (fetchData) fetchPuzzles();
   }, [fetchData]);
 
-  // 
+  // Periodically check if the day changed
+  useEffect(() => {
+    const checkDayChange = () => {
+      if (!fetchData) return;
+      const today = new Date().toDateString();
+      if (currentDayRef.current !== today) {
+        currentDayRef.current = today;
+        fetchPuzzles();
+      }
+    };
+
+    // Check every 5 minutes
+    const interval = setInterval(checkDayChange, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [
+    fetchData,
+  ]);
 
   const fetchPuzzles = async () => {
     if (isLoading)
@@ -48,6 +66,7 @@ export function usePuzzleGrabber(fetchData?: boolean) {
       const puzzleEval = evaluateEquationArray(currentPuzzle);
       setTodaysPuzzle(currentPuzzle);
       setPuzzleTargetValue(puzzleEval);
+      setLastFetched(new Date());
     } catch (error) {
       console.error("Error fetching puzzles:", error);
     } finally {

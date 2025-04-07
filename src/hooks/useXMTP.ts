@@ -1,10 +1,17 @@
-import { xmtpClientAtom, xmtpErrorAtom, xmtpGameToShareAtom, xmtpShareModalOpen, xmtpStatusAtom } from "@/state/atoms";
+import {
+  xmtpClientAtom,
+  xmtpErrorAtom,
+  xmtpGameToShareAtom,
+  xmtpShareModalOpen,
+  xmtpStatusAtom,
+} from "@/state/atoms";
 import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
 import { useAtom } from "jotai";
-import { Client, Signer as XmtpSigner } from "@xmtp/xmtp-js";
+import { Client, Identifier, Signer } from "@xmtp/browser-sdk";
 import { useCallback, useEffect } from "react";
 import { ethers } from "ethers";
 import { MathlerGameRecord } from "@/types/mathler";
+import { getEmojiGridFromGame } from "@/utils/mathler";
 
 const useXMTPMessenger = () => {
   const { primaryWallet } = useDynamicContext();
@@ -16,43 +23,49 @@ const useXMTPMessenger = () => {
 
   const initXMTP = async () => {
     if (currentStatus === "connecting") return;
-  if (!primaryWallet?.signMessage || !primaryWallet?.address) {
-    console.log("No primary wallet found");
-    return;
-  }
+    if (!primaryWallet?.signMessage || !primaryWallet?.address) {
+      console.log("No primary wallet found");
+      return;
+    }
 
-  if (client) {
-    console.log("XMTP client already initialized");
-    return;
-  }
+    if (client) {
+      console.log("XMTP client already initialized");
+      return;
+    }
 
-  try {
-    setStatus("connecting");
-    const xmtpSigner: XmtpSigner = {
-      getAddress: async () => primaryWallet.address!,
-      signMessage: async (message: Uint8Array | string) => {
-        if (typeof message !== "string") {
-          message = new TextDecoder().decode(message);
-        }
-        const signedMessage = await primaryWallet.signMessage(message);
-        if (!signedMessage) {
-          throw new Error("Failed to sign message");
-        }
-        return signedMessage;
-      },
-    };
-    const xmtp = await Client.create(xmtpSigner, {
-      env: "dev",
-      // env: "production",
-    });
-    setClient(xmtp);
-    setStatus("connected");
-  } catch (error: any) {
-    console.error("Error initializing XMTP:", error);
-    setError(error.message || "Unknown error");
-    setStatus("error");
-  }
-};
+    try {
+      setStatus("connecting");
+      const accountIdentifier: Identifier = {
+        identifier: primaryWallet.address,
+        identifierKind: "Ethereum",
+      };
+
+      const xmtpSigner: Signer = {
+        type: "EOA",
+        getIdentifier: async () => accountIdentifier,
+        signMessage: async (message: Uint8Array | string): Promise<Uint8Array> => {
+          if (typeof message !== "string") {
+            message = new TextDecoder().decode(message);
+          }
+      
+          const signature = await primaryWallet.signMessage(message);
+      
+          // Convert hex string to Uint8Array
+          return Uint8Array.from(Buffer.from(signature!.slice(2), 'hex'));
+        },
+      };
+      const encryptionKey = window.crypto.getRandomValues(new Uint8Array(32));
+      const xmtp = await Client.create(xmtpSigner, encryptionKey, {
+        env: "dev",
+      });
+      setClient(xmtp);
+      setStatus("connected");
+    } catch (error: any) {
+      console.error("Error initializing XMTP:", error);
+      setError(error.message || "Unknown error");
+      setStatus("error");
+    }
+  };
 
   useEffect(() => {
     initXMTP();
@@ -61,11 +74,11 @@ const useXMTPMessenger = () => {
   useEffect(() => {
     // clear the error after 5 seconds
     const timeout = setTimeout(() => {
-        if (currentError) setError(null)
-    }, 5_000)
+      if (currentError) setError(null);
+    }, 5_000);
 
-    return () => clearTimeout(timeout)
-  }, [currentError])
+    return () => clearTimeout(timeout);
+  }, [currentError]);
 
   const isValidXmtpAddress = useCallback(
     (address: string) => {
@@ -87,7 +100,11 @@ const useXMTPMessenger = () => {
       }
 
       try {
-        const isValidXmtpAddress = client.canMessage(address);
+        const recipientIdentifier: Identifier = {
+          identifier: address,
+          identifierKind: "Ethereum",
+        };
+        const isValidXmtpAddress = client.canMessage([recipientIdentifier]);
         return isValidXmtpAddress;
       } catch (error) {
         console.error("Error validating XMTP address:", error);
@@ -103,15 +120,19 @@ const useXMTPMessenger = () => {
         console.error("XMTP client not initialized");
         return;
       }
+      const recipientIdentifier: Identifier = {
+        identifier: recipient,
+        identifierKind: "Ethereum",
+      };
 
-      const canMessage = await client.canMessage(recipient);
+      const canMessage = await client.canMessage([recipientIdentifier]);
       if (!canMessage) {
         setError("Recipient cannot receive messages");
         return;
       }
 
       try {
-        const conversation = await client.conversations.newConversation(
+        const conversation = await client.conversations.newDm(
           recipient
         );
         await conversation.send(message);
@@ -128,12 +149,26 @@ const useXMTPMessenger = () => {
   const closeXMTPModal = useCallback(() => {
     setModalOpen(false);
     setGameToShare(undefined);
-  }, [])
+  }, []);
 
   const setGameScoreToShare = useCallback((game: MathlerGameRecord) => {
     setGameToShare(game);
     setModalOpen(true);
-  }, [])
+  }, []);
+
+  const generateMessage = useCallback((game: MathlerGameRecord) => {
+    const { puzzle, status } = game;
+    const emojiGrid = getEmojiGridFromGame(game);
+
+    const intro =
+      status === "won"
+        ? "I solved the puzzle! 🎉"
+        : "I couldn't solve the puzzle. 😢";
+
+    const puzzleString = `Puzzle: ${puzzle.join(" ")}`;
+    const message = `${intro}\n\n${puzzleString}\n\n${emojiGrid}`;
+    return message;
+  }, []);
 
   return {
     modalOpen,
@@ -142,6 +177,7 @@ const useXMTPMessenger = () => {
     setGameScoreToShare,
     isValidXmtpAddress,
     sendMessage,
+    generateMessage,
   };
 };
 

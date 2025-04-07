@@ -17,7 +17,7 @@
     "@mantine/hooks": "^6.0.21",
     "@mantine/modals": "^6.0.21",
     "@mantine/notifications": "^6.0.21",
-    "@xmtp/xmtp-js": "^13.0.4",
+    "@xmtp/browser-sdk": "^1.1.4",
     "ethers": "^6.13.5",
     "jotai": "^2.12.2",
     "mathjs": "^14.4.0",

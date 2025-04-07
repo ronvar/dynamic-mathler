@@ -10,9 +10,6 @@ const PlayGame: React.FC = () => {
   const { todaysPuzzle, puzzleTargetValue } = usePuzzleGrabber(true);
   const { activeGame, activeRow, createNewGame, submitAttempt } = useMathler();
 
-  console.log('todaysPuzzle', todaysPuzzle);
-  console.log('activeGame', activeGame);
-
   let title = "Try to solve the puzzle!";
   if (activeGame?.status === "won") {
     title = "Hell yea, you did it. Congrats!";

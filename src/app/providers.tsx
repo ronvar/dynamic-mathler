@@ -3,6 +3,7 @@
 import { MantineProvider } from "@mantine/core";
 import {
   DynamicContextProvider,
+  DynamicWidget,
 } from "@dynamic-labs/sdk-react-core";
 import { EthereumWalletConnectors } from "@dynamic-labs/ethereum";
 import React from "react";
@@ -31,6 +32,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
           fontFamily: inter.style.fontFamily,
         }}
       >
+        <DynamicWidget />
         {children}
       </MantineProvider>
     </DynamicContextProvider>

@@ -1,6 +1,7 @@
 import { MathlerGameRecord } from '@/types/mathler';
 import { UserMetadata } from '@/types/user';
-import { Client, Conversation } from '@xmtp/xmtp-js';
+import { UserProfile } from '@dynamic-labs/sdk-react-core';
+import { Client } from '@xmtp/browser-sdk';
 import { atom } from 'jotai';
 
 /* Global Puzzle Atoms */
@@ -12,6 +13,7 @@ export const dailyTargetValueAtom = atom<number | null>(null); // the result to 
 export const userDataIsLoadingAtom = atom<boolean>(false); // loading state for user data
 export const userMetadataAtom = atom<UserMetadata>(); // user metadata
 export const userGamesHistoryAtom = atom<MathlerGameRecord[]>([]); // user game history
+export const userAtom = atom<UserProfile>(); // user object from dynamic
 
 /* Active Game Atoms */
 export const activeGameAtom = atom<MathlerGameRecord | null>(null); // current game in progress

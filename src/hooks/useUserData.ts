@@ -1,4 +1,4 @@
-import { userDataIsLoadingAtom, userMetadataAtom } from "@/state/atoms";
+import { userAtom, userDataIsLoadingAtom, userMetadataAtom } from "@/state/atoms";
 import { MathlerGameRecord } from "@/types/mathler";
 import { UserMetadata } from "@/types/user";
 import {
@@ -9,6 +9,7 @@ import {
 } from "@dynamic-labs/sdk-react-core";
 import { useAtom } from "jotai";
 import { useCallback, useEffect, useState } from "react";
+import useXMTPMessenger from "./useXMTP";
 
 export function useUserData(fetchData = false) {
   const {
@@ -19,12 +20,16 @@ export function useUserData(fetchData = false) {
   } = useDynamicContext();
   const { updateUser } = useUserUpdateRequest();
   const refresh = useRefreshUser();
+  // const { setGameScoreToShare } = useXMTPMessenger();
   const isLoggedIn = useIsLoggedIn();
   const [isLoading, setIsLoading] = useAtom(userDataIsLoadingAtom);
   const [userMetadata, setUserMetadata] = useAtom(userMetadataAtom);
-  const [user, setUser] = useState(dynamicUser);
+  const [user, setUser] = useAtom(userAtom);
 
   const fetchUserAndMetadata = useCallback(async () => {
+    if (fetchData) {
+      console.log('[fetchUserAndMetadata]', isLoading, isLoggedIn, user)
+    }
     if (isLoading || !isLoggedIn || !fetchData) return;
     setIsLoading(true);
     try {
@@ -149,7 +154,7 @@ export function useUserData(fetchData = false) {
   }, [user, userMetadata, refresh, updateUser]);
 
   const shareScore = useCallback(async (game: MathlerGameRecord) => {
-    console.log(" initiate xmtp modal");
+    // setGameScoreToShare(game);
   }, []);
 
   const logOut = useCallback(async () => {

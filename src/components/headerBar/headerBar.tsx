@@ -6,10 +6,7 @@ import { useCallback } from "react";
 const AppHeaderBar: React.FC = () => {
     const { user, primaryWallet, logOut, setShowAuthFlow } = useUserData();
     const userAddress = !!user ? primaryWallet?.address : "";
-
-    console.log('user', user);
-    console.log('primaryWallet', primaryWallet);
-
+    
     const onLoginClick = useCallback(() => {
         if (!user) {
             setShowAuthFlow(true);

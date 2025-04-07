@@ -1,17 +1,21 @@
-import { MathlerGameRecord, AttemptItem, TileFeedbackColor } from "@/types/mathler";
-import { evaluate } from 'mathjs';
+import {
+  MathlerGameRecord,
+  AttemptItem,
+  TileFeedbackColor,
+} from "@/types/mathler";
+import { evaluate } from "mathjs";
 
 const congratulatoryEmojis = [
-    "🎉",
-    "🥳",
-    "🎊",
-    "🎈",
-    "🎆",
-    "🎇",
-    "✨",
-    "🌟",
-    "🌈",
-]
+  "🎉",
+  "🥳",
+  "🎊",
+  "🎈",
+  "🎆",
+  "🎇",
+  "✨",
+  "🌟",
+  "🌈",
+];
 
 /**
  * check if a token is a valid operator
@@ -26,7 +30,10 @@ export const isNumber = (token: string) => /^\d+$/.test(token);
 /**
  * extracts numbers and operators from an expression array
  */
-function extractTokens(expr: string[]): { numbers: string[]; operators: string[] } {
+function extractTokens(expr: string[]): {
+  numbers: string[];
+  operators: string[];
+} {
   const numbers: string[] = [];
   const operators: string[] = [];
 
@@ -55,7 +62,10 @@ function tokenFrequency(tokens: string[]): Record<string, number> {
  * verifies that every token in the puzzle exists in the guess
  * with the same or higher frequency (for supporting duplicates)
  */
-function checkTokenCountsMatch(puzzleTokens: string[], attemptTokens: string[]): boolean {
+function checkTokenCountsMatch(
+  puzzleTokens: string[],
+  attemptTokens: string[]
+): boolean {
   const puzzleFreq = tokenFrequency(puzzleTokens);
   const attemptFreq = tokenFrequency(attemptTokens);
 
@@ -75,7 +85,10 @@ function checkTokenCountsMatch(puzzleTokens: string[], attemptTokens: string[]):
  *  - it evaluates to the same number
  *  - all numbers and operators in the puzzle are used with equal or greater frequency
  */
-function compareEquationStructure(puzzle: string[], attempt: string[]): boolean {
+function compareEquationStructure(
+  puzzle: string[],
+  attempt: string[]
+): boolean {
   try {
     if (attempt.length < puzzle.length) return false;
 
@@ -85,7 +98,8 @@ function compareEquationStructure(puzzle: string[], attempt: string[]): boolean 
     if (puzzleVal !== attemptVal) return false;
 
     const { numbers: puzzleNums, operators: puzzleOps } = extractTokens(puzzle);
-    const { numbers: attemptNums, operators: attemptOps } = extractTokens(attempt);
+    const { numbers: attemptNums, operators: attemptOps } =
+      extractTokens(attempt);
 
     const numsMatch = checkTokenCountsMatch(puzzleNums, attemptNums);
     const opsMatch = checkTokenCountsMatch(puzzleOps, attemptOps);
@@ -116,21 +130,25 @@ export const evaluateTileRow = (
   if (!hasOnlyValidTokens) {
     return currentAttempt.map((token) => ({
       value: token.value,
-      color: 'gray',
+      color: "gray",
     }));
   }
 
-  const isCorrect = compareEquationStructure(puzzle, currentAttempt.map((t) => t.value));
+  const attemptValues = currentAttempt.map((t) => t.value);
+  const isCorrect = compareEquationStructure(
+    puzzle,
+    attemptValues
+  );
 
   for (let i = 0; i < currentAttempt.length; i++) {
     const token = currentAttempt[i];
 
-    let color: TileFeedbackColor = 'gray';
+    let color: TileFeedbackColor = "gray";
 
-    if (isCorrect && token.value === puzzle[i]) {
-      color = 'green';
+    if (isCorrect) {
+      color = "green";
     } else if (puzzle.includes(token.value)) {
-      color = 'yellow';
+      color = "yellow";
     }
 
     feedback.push({ value: token.value, color });
@@ -140,19 +158,21 @@ export const evaluateTileRow = (
 };
 
 export const evaluateEquationArray = (puzzle: string[]) => {
-  const puzzleExpr = puzzle.join('');
+  const puzzleExpr = puzzle.join("");
   try {
     return evaluate(puzzleExpr);
   } catch (err) {
     return null;
   }
-}
+};
 
+/**
+ * Checks if the game was started today
+ */
 export const wasStartedToday = (game: MathlerGameRecord): boolean => {
   const currentDate = new Date();
   const gameDate = new Date(game.startedAt);
-  console.log("currentDate", currentDate);
-  console.log("gameDate", gameDate);
+
   return (
     currentDate.getDate() === gameDate.getDate() &&
     currentDate.getMonth() === gameDate.getMonth() &&
@@ -166,30 +186,47 @@ export const wasStartedToday = (game: MathlerGameRecord): boolean => {
 export const normalizeOperator = (token: string): string => {
   const map: Record<string, string> = {
     // Plus
-    '＋': '+',
-    '﹢': '+',
-    '⁺': '+',
+    "＋": "+",
+    "﹢": "+",
+    "⁺": "+",
     // Minus
-    '–': '-', // en dash
-    '−': '-', // minus sign
-    '—': '-', // em dash
-    '﹣': '-',
-    '‒': '-',
+    "–": "-", // en dash
+    "−": "-", // minus sign
+    "—": "-", // em dash
+    "﹣": "-",
+    "‒": "-",
     // Multiplication
-    '×': '*',
-    '✕': '*',
-    '✖': '*',
-    '＊': '*',
+    "×": "*",
+    "✕": "*",
+    "✖": "*",
+    "＊": "*",
     // Division
-    '÷': '/',
-    '∕': '/',
-    '／': '/',
+    "÷": "/",
+    "∕": "/",
+    "／": "/",
   };
 
   return map[token] || token;
 };
 
-export const getRandomCongratulatoryEmoji = () => {
-  const randomIndex = Math.floor(Math.random() * congratulatoryEmojis.length);
-  return congratulatoryEmojis[randomIndex];
-}
+/**
+ *  Generates a wordle-like grid of emojis from the game record.
+ */
+export const getEmojiGridFromGame = (game: MathlerGameRecord) => {
+  const colorToEmoji: Record<TileFeedbackColor, string> = {
+    green: "🟩",
+    yellow: "🟨",
+    gray: "⬛",
+  };
+
+  return game.attemptsGrid
+    .map((attempt) => {
+      return attempt
+        .map((tile) => {
+          if (!tile.color) return "⬛";
+          return colorToEmoji[tile.color];
+        })
+        .join("");
+    })
+    .join("\n");
+};
