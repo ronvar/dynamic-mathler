@@ -1,4 +1,8 @@
-import { userAtom, userDataIsLoadingAtom, userMetadataAtom } from "@/state/atoms";
+import {
+  userAtom,
+  userDataIsLoadingAtom,
+  userMetadataAtom,
+} from "@/state/atoms";
 import { MathlerGameRecord } from "@/types/mathler";
 import { UserMetadata } from "@/types/user";
 import {
@@ -27,9 +31,6 @@ export function useUserData(fetchData = false) {
   const [user, setUser] = useAtom(userAtom);
 
   const fetchUserAndMetadata = useCallback(async () => {
-    if (fetchData) {
-      console.log('[fetchUserAndMetadata]', isLoading, isLoggedIn, user)
-    }
     if (isLoading || !isLoggedIn || !fetchData) return;
     setIsLoading(true);
     try {
@@ -41,13 +42,21 @@ export function useUserData(fetchData = false) {
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading, isLoggedIn, fetchData, refresh, setIsLoading, setUser, setUserMetadata]);
+  }, [
+    isLoading,
+    isLoggedIn,
+    fetchData,
+    refresh,
+    setIsLoading,
+    setUser,
+    setUserMetadata,
+  ]);
 
   useEffect(() => {
     if (fetchData)
-    if (isLoggedIn && !user && fetchData) {
-      fetchUserAndMetadata();
-    }
+      if (isLoggedIn && !user && fetchData) {
+        fetchUserAndMetadata();
+      }
   }, [isLoggedIn, user]);
 
   const updateUserMetadata = useCallback(
@@ -84,9 +93,6 @@ export function useUserData(fetchData = false) {
       } else {
         Object.assign(updatedMetadata, {
           history: [...history, gameCopy],
-          totalTimePlayed:
-            totalTimePlayed + (gameCopy.finishedAt - gameCopy.startedAt),
-          totalGamesPlayed: totalGamesPlayed + 1,
         });
       }
 
@@ -110,11 +116,12 @@ export function useUserData(fetchData = false) {
         });
       }
 
-      if (gameCopy.status !== "playing") {
-        Object.assign(updatedMetadata, {
-          totalWins: game.status === "won" ? totalGamesWon + 1 : totalGamesWon,
-        });
-      }
+      Object.assign(updatedMetadata, {
+        totalTimePlayed:
+          totalTimePlayed + (gameCopy.finishedAt - gameCopy.startedAt),
+        totalGames: updatedMetadata.history.length,
+        totalWins: atLeastOneRowIsAllGreen ? totalGamesWon + 1 : totalGamesWon,
+      });
       setIsLoading(true);
       try {
         await updateUser({
@@ -127,7 +134,7 @@ export function useUserData(fetchData = false) {
         setIsLoading(false);
       }
     },
-    [user, userMetadata]
+    [user, userMetadata, refresh, updateUser, fetchUserAndMetadata]
   );
 
   // FOR DEBUGGING ONLY
