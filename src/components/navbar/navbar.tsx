@@ -1,4 +1,4 @@
-import { Button, Group, Navbar, Stack } from "@mantine/core";
+import { Button, Group, Navbar } from "@mantine/core";
 import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
 import { FaHome } from "react-icons/fa";

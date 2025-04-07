@@ -93,7 +93,12 @@ function compareEquationStructure(
     const opsMatch = checkTokenCountsMatch(puzzleOps, attemptOps);
 
     return numsMatch && opsMatch;
-  } catch (err) {
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      console.error("Error evaluating equation:", err.message);
+    } else {
+      console.error("Unknown error evaluating equation:");
+    }
     return false;
   }
 }
@@ -150,6 +155,7 @@ export const evaluateEquationArray = (puzzle: string[]) => {
   try {
     return evaluate(puzzleExpr);
   } catch (err) {
+    console.error("Error evaluating equation:", err);
     return null;
   }
 };

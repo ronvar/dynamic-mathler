@@ -12,12 +12,10 @@ import {
   useUserUpdateRequest,
 } from "@dynamic-labs/sdk-react-core";
 import { useAtom } from "jotai";
-import { useCallback, useEffect, useState } from "react";
-import useXMTPMessenger from "./useXMTP";
+import { useCallback, useEffect } from "react";
 
 export function useUserData(fetchData = false) {
   const {
-    user: dynamicUser,
     primaryWallet,
     setShowAuthFlow,
     handleLogOut,
@@ -72,7 +70,7 @@ export function useUserData(fetchData = false) {
       const totalGamesPlayed = userMetadata?.totalGames || 0;
       const totalGamesWon = userMetadata?.totalWins || 0;
 
-      let updatedMetadata: UserMetadata = {
+      const updatedMetadata: UserMetadata = {
         ...userMetadata,
         history,
         totalTimePlayed,
@@ -161,6 +159,7 @@ export function useUserData(fetchData = false) {
   }, [user, userMetadata, refresh, updateUser]);
 
   const shareScore = useCallback(async (game: MathlerGameRecord) => {
+    console.log("Sharing score:", game);
     // setGameScoreToShare(game);
   }, []);
 

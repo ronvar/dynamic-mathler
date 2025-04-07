@@ -83,11 +83,12 @@ export const GameGrid: React.FC<GameGridProps> = ({
           setActiveColumnIndex(colIndex - 1);
         }
       } else if (keyPressed === "Enter" || keyPressed === "NumpadEnter") {
+        if (!onAttemptComplete) return;
         const guess = [...(attempts[activeRowIndex] || [])];
         if (guess.length === rowLength && guess.every((t) => t.value)) {
           e.preventDefault();
           setIsSubmitting(true);
-          onAttemptComplete && await onAttemptComplete(guess);
+          await onAttemptComplete(guess);
           const wasCorrect = guess.every((t) => t.color === "green");
           setRowFeedback(wasCorrect ? "correct" : "incorrect");
           if (wasCorrect) {

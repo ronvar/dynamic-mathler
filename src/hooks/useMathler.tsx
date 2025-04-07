@@ -1,9 +1,9 @@
 import { AttemptItem, MathlerGameRecord } from "@/types/mathler";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
 import { useUserData } from "./useUserData";
 import { evaluateTileRow, wasStartedToday } from "@/utils/mathler";
 import { useAtom } from "jotai";
-import { activeGameAtom, activeRowAtom, puzzleAtom, userGamesHistoryAtom } from "@/state/atoms";
+import { activeGameAtom, activeRowAtom } from "@/state/atoms";
 import { usePuzzleGrabber } from "./usePuzzleGrabber";
 import { v4 as uuidV4 } from "uuid";
 

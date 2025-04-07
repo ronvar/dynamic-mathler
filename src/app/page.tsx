@@ -1,7 +1,6 @@
 'use client';
 
 import styles from "./page.module.css";
-import { usePuzzleGrabber } from "@/hooks/usePuzzleGrabber";
 import { Button, Flex, Text } from "@mantine/core";
 import { useUserData } from "@/hooks/useUserData";
 import { useRouter } from "next/navigation";

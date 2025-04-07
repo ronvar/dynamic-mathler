@@ -5,14 +5,13 @@ import {
   isLoadingPuzzleAtom,
   puzzleAtom,
 } from "@/state/atoms";
-import { AttemptItem } from "@/types/mathler";
 import { evaluateEquationArray, normalizeOperator } from "@/utils/mathler";
 import { useAtom } from "jotai";
 import { useEffect, useRef, useState } from "react";
 
 export function usePuzzleGrabber(fetchData?: boolean) {
   const [isLoading, setIsLoading] = useAtom(isLoadingPuzzleAtom);
-  const [lastFetched, setLastFetched] = useState<Date | null>(null);
+  const [, setLastFetched] = useState<Date | null>(null);
   const [todaysPuzzle, setTodaysPuzzle] = useAtom(puzzleAtom);
   const [puzzleTargetValue, setPuzzleTargetValue] =
     useAtom(dailyTargetValueAtom);

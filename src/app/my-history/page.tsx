@@ -5,14 +5,14 @@ import { useMathler } from "@/hooks/useMathler";
 import { usePuzzleGrabber } from "@/hooks/usePuzzleGrabber";
 import { useUserData } from "@/hooks/useUserData";
 import { evaluateEquationArray } from "@/utils/mathler";
-import { Button, Center, Group, ScrollArea, Stack, Text } from "@mantine/core";
+import { Center, Group, ScrollArea, Stack, Text } from "@mantine/core";
 import React from "react";
 import styles from "./page.module.scss";
 
 const MyHistory: React.FC = () => {
-  const { todaysPuzzle, puzzleTargetValue } = usePuzzleGrabber(false);
+  const { todaysPuzzle } = usePuzzleGrabber(false);
   const { userMetadata } = useUserData();
-  const { activeGame, activeRow, createNewGame, submitAttempt } = useMathler();
+  const { activeRow } = useMathler();
 
   const history = [...(userMetadata?.history || [])];
   

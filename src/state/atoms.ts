@@ -24,4 +24,4 @@ export const xmtpClientAtom = atom<Client | null>(null);
 export const xmtpStatusAtom = atom<'idle' | 'connecting' | 'connected' | 'error'>('idle');
 export const xmtpErrorAtom = atom<string | null>(null); 
 export const xmtpGameToShareAtom = atom<MathlerGameRecord>();
-export const xmtpShareModalOpen = atom<Boolean>(false);
+export const xmtpShareModalOpen = atom<boolean>(false);

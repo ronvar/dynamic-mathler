@@ -18,7 +18,7 @@ const useXMTPMessenger = () => {
   const [client, setClient] = useAtom(xmtpClientAtom);
   const [currentStatus, setStatus] = useAtom(xmtpStatusAtom);
   const [currentError, setError] = useAtom(xmtpErrorAtom);
-  const [gameToShare, setGameToShare] = useAtom(xmtpGameToShareAtom);
+  const [, setGameToShare] = useAtom(xmtpGameToShareAtom);
   const [modalOpen, setModalOpen] = useAtom(xmtpShareModalOpen);
 
   const initXMTP = async () => {
@@ -60,9 +60,14 @@ const useXMTPMessenger = () => {
       });
       setClient(xmtp);
       setStatus("connected");
-    } catch (error: any) {
-      console.error("Error initializing XMTP:", error);
-      setError(error.message || "Unknown error");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error("Error initializing XMTP:", error);
+        setError(error.message);
+      } else {
+        console.error("Unknown error initializing XMTP:", error);
+        setError("Unknown error");
+      }
       setStatus("error");
     }
   };
@@ -137,9 +142,14 @@ const useXMTPMessenger = () => {
         );
         await conversation.send(message);
         return true;
-      } catch (error: any) {
-        console.error("Error sending message:", error);
-        setError(error.message || "Unknown error");
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          console.error("Error sending message with XMTP:", error);
+          setError(error.message);
+        } else {
+          console.error("Unknown error sending message with XMTP:", error);
+          setError("Unknown error");
+        }
         return false;
       }
     },
